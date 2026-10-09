@@ -25,32 +25,56 @@
 #define LCD_INIT_VARIANT INITR_MINI160x80_PLUGIN   // fallback: INITR_MINI160x80
 #endif
 
-static Adafruit_ST7735 lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
+#ifndef LCD_X_OFF
+#define LCD_X_OFF 1    // horizontal origin offset (landscape)
+#endif
+#ifndef LCD_Y_OFF
+#define LCD_Y_OFF 26   // vertical origin offset (landscape)
+#endif
+
+class LcdPanel : public Adafruit_ST7735
+{
+public:
+    using Adafruit_ST7735::Adafruit_ST7735;
+    void setOrigin(int16_t x, int16_t y) { _xstart = x; _ystart = y; }
+    // Black out the whole controller RAM (132x162) so no stale pixels show.
+    void clearRam()
+    {
+        static const int16_t o[4][2] = {{0, 0}, {2, 0}, {0, 52}, {2, 52}};
+        for (int i = 0; i < 4; i++)
+        {
+            setOrigin(o[i][0], o[i][1]);
+            fillScreen(ST77XX_BLACK);
+        }
+    }
+};
+
+static LcdPanel lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
 
 static void lcdInit()
 {
-#ifdef LCD_TEST
-    // Diagnostic: cycle init modes, show color bars + label. Note which letter looks right.
-    for (int m = 0; m < 3; m++)
-    {
-        lcd.initR(m == 1 ? INITR_MINI160x80_PLUGIN : INITR_MINI160x80);
-        lcd.invertDisplay(m == 2);
-        lcd.setRotation(1);
-        lcd.fillScreen(ST77XX_BLACK);
-        lcd.fillRect(0, 0, 40, 40, ST77XX_RED);
-        lcd.fillRect(40, 0, 40, 40, ST77XX_GREEN);
-        lcd.fillRect(80, 0, 40, 40, ST77XX_BLUE);
-        lcd.fillRect(120, 0, 40, 40, ST77XX_WHITE);
-        lcd.drawRect(0, 0, 160, 80, ST77XX_YELLOW);
-        lcd.setTextColor(ST77XX_WHITE);
-        lcd.setTextSize(4);
-        lcd.setCursor(60, 46);
-        lcd.print(m == 0 ? "A" : m == 1 ? "B" : "C");
-        delay(3000);
-    }
-#endif
     lcd.initR(LCD_INIT_VARIANT);
     lcd.setRotation(1);   // 160x80 landscape
+#ifdef LCD_TEST
+    // Offset scan: find the label whose white border is complete on all 4 edges
+    // with no junk rows/columns. Report that X/Y pair.
+    for (int x = 0; x <= 4; x++)
+    {
+        for (int y = 24; y <= 29; y++)
+        {
+            lcd.clearRam();
+            lcd.setOrigin(x, y);
+            lcd.drawRect(0, 0, 160, 80, ST77XX_WHITE);
+            lcd.setTextColor(ST77XX_YELLOW);
+            lcd.setTextSize(2);
+            lcd.setCursor(20, 32);
+            lcd.printf("X%d Y%d", x, y);
+            delay(1200);
+        }
+    }
+#endif
+    lcd.clearRam();
+    lcd.setOrigin(LCD_X_OFF, LCD_Y_OFF);
     lcd.fillScreen(ST77XX_BLACK);
     lcd.setTextWrap(false);
     lcd.setTextSize(1);
