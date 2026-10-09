@@ -14,3 +14,4 @@ __pycache__/
 /henloader/
 !/autoloader/**/*.bin
 !/autoloader/**/*.elf
+replace_autoloader_elf.py
