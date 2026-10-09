@@ -11,16 +11,16 @@
 #include "server_certs.h"
 
 #ifdef LCD_DONGLE
-// LILYGO T-Dongle-S3 style 0.96" ST7735 80x160 LCD (software SPI).
+// Pocket-Dongle-S3 0.96" ST7735 80x160 LCD (software SPI).
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
 
-#define LCD_MOSI 3
-#define LCD_SCLK 5
-#define LCD_CS   4
-#define LCD_DC   2
-#define LCD_RST  1
-#define LCD_BL   38   // active LOW on this board
+// Pocket-Dongle-S3 (AliExpress) pins. Backlight is always on (no control pin).
+#define LCD_MOSI 11
+#define LCD_SCLK 10
+#define LCD_CS   12
+#define LCD_DC   13
+#define LCD_RST  14
 #ifndef LCD_INIT_VARIANT
 #define LCD_INIT_VARIANT INITR_MINI160x80   // try INITR_MINI160x80_PLUGIN if image is shifted
 #endif
@@ -29,8 +29,6 @@ static Adafruit_ST7735 lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
 
 static void lcdInit()
 {
-    pinMode(LCD_BL, OUTPUT);
-    digitalWrite(LCD_BL, LOW);
 #ifdef LCD_TEST
     // Diagnostic: cycle init modes, show color bars + label. Note which letter looks right.
     for (int m = 0; m < 3; m++)
