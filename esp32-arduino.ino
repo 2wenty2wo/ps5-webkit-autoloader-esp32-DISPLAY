@@ -22,7 +22,7 @@
 #define LCD_DC   13
 #define LCD_RST  14
 #ifndef LCD_INIT_VARIANT
-#define LCD_INIT_VARIANT INITR_MINI160x80   // try INITR_MINI160x80_PLUGIN if image is shifted
+#define LCD_INIT_VARIANT INITR_MINI160x80_PLUGIN   // fallback: INITR_MINI160x80
 #endif
 
 static Adafruit_ST7735 lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
