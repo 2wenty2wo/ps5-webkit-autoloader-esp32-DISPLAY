@@ -62,6 +62,10 @@ S3_USB_OPTIONS := USBMode=default,CDCOnBoot=default
 C3_USB_OPTIONS := CDCOnBoot=default
 endif
 USB_DEBUG_FLAG := -DUSB_DEBUG=$(USB_DEBUG)
+LCD ?= 0
+ifeq ($(LCD),1)
+LCD_FLAG := -DLCD_DONGLE
+endif
 ifeq ($(USB_DEBUG),1)
 S2_TLS_DEBUG_LINK := --build-property "compiler.c.elf.extra_flags=-Wl,--wrap=esp_tls_server_session_create"
 endif
@@ -110,7 +114,7 @@ ESP8266_FLASH_SIZE := 4194304
 ESP8266_LITTLEFS_SIZE := 0x2FA000
 ESP8266_LITTLEFS_OFFSET := 0x100000
 
-.PHONY: all debug debug-s2 pico pico-8m s2 s3 c3 8266 littlefs datadir minimize check check-minimize check-data check-littlefs check-8266 clean FORCE
+.PHONY: all debug debug-s2 s3-lcd pico pico-8m s2 s3 c3 8266 littlefs datadir minimize check check-minimize check-data check-littlefs check-8266 clean FORCE
 
 all: check $(PICO_MERGED) $(S2_MERGED) $(S3_MERGED) $(C3_MERGED)
 	@echo
@@ -122,6 +126,9 @@ debug:
 
 debug-s2:
 	@$(MAKE) USB_DEBUG=1 BUILD_DIR="$(PROJECT_DIR)/build/debug" s2
+
+s3-lcd:
+	@$(MAKE) LCD=1 BUILD_DIR="$(PROJECT_DIR)/build/lcd" s3
 
 pico: check $(PICO_MERGED)
 	@ls -lh "$(PICO_MERGED)"
@@ -261,7 +268,7 @@ $(S3_APP): $(PROJECT_DIR)/$(PROJECT_NAME).ino $(SERVER_HEADER) $(PROJECT_DIR)/pa
 	$(ARDUINO_CLI) compile \
 	    $(DNS_LIBRARY_ARG) \
 	    --fqbn "$(S3_FQBN)" \
-	    --build-property "compiler.cpp.extra_flags=$(USB_DEBUG_FLAG)" \
+	    --build-property "compiler.cpp.extra_flags=$(USB_DEBUG_FLAG) $(LCD_FLAG)" \
 	    --output-dir "$(S3_BUILD_DIR)" \
 	    --build-property "build.partitions=partitions" \
 	    --build-property "build.filesystem=littlefs" \

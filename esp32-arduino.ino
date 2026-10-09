@@ -10,6 +10,58 @@
 #include "esp_idf_version.h"
 #include "server_certs.h"
 
+#ifdef LCD_DONGLE
+// LILYGO T-Dongle-S3 style 0.96" ST7735 80x160 LCD (software SPI).
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+
+#define LCD_MOSI 3
+#define LCD_SCLK 5
+#define LCD_CS   4
+#define LCD_DC   2
+#define LCD_RST  1
+#define LCD_BL   38   // active LOW on this board
+#ifndef LCD_INIT_VARIANT
+#define LCD_INIT_VARIANT INITR_MINI160x80   // try INITR_MINI160x80_PLUGIN if image is shifted
+#endif
+
+static Adafruit_ST7735 lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
+
+static void lcdInit()
+{
+    pinMode(LCD_BL, OUTPUT);
+    digitalWrite(LCD_BL, LOW);
+    lcd.initR(LCD_INIT_VARIANT);
+    lcd.setRotation(1);   // 160x80 landscape
+    lcd.fillScreen(ST77XX_BLACK);
+    lcd.setTextWrap(false);
+    lcd.setTextSize(1);
+}
+
+static void lcdLine(int16_t y, const char *label, const String &value)
+{
+    lcd.setTextColor(ST77XX_CYAN);
+    lcd.setCursor(2, y);
+    lcd.print(label);
+    lcd.setTextColor(ST77XX_WHITE);
+    lcd.print(value);
+}
+
+static void lcdShowInfo(const char *title, const String &ip,
+                        const char *ssid, const char *pass)
+{
+    lcd.fillScreen(ST77XX_BLACK);
+    lcd.fillRect(0, 0, 160, 14, ST77XX_BLUE);
+    lcd.setTextColor(ST77XX_WHITE);
+    int16_t x = (160 - (int16_t)strlen(title) * 6) / 2;
+    lcd.setCursor(x < 0 ? 0 : x, 3);
+    lcd.print(title);
+    lcdLine(22, "IP:   ", ip);
+    lcdLine(40, "WiFi: ", String(ssid));
+    lcdLine(58, "Pass: ", String(pass));
+}
+#endif
+
 #ifndef USB_DEBUG
 #define USB_DEBUG 0
 #endif
@@ -138,7 +190,8 @@ extern "C" int __wrap_esp_tls_server_session_create(esp_tls_cfg_server_t *cfg,
 
 httpd_handle_t httpsServer = NULL;
 
-static const char *AP_SSID = "ESP32_PORTAL";
+static const char *AP_TITLE = "PS5 Master Key";
+static const char *AP_SSID = AP_TITLE;
 static const char *AP_PASSWORD = "12345678";
 static const char *PORTAL_REDIRECT_URL = "http://192.168.4.1/";
 
@@ -938,6 +991,10 @@ void setup()
 
     Serial.begin(115200);
 
+#ifdef LCD_DONGLE
+    lcdInit();
+#endif
+
     delay(1000);
 #if USB_DEBUG
     esp_log_set_vprintf(tlsDebugVprintf);
@@ -1003,6 +1060,10 @@ void setup()
 
     Serial.print("AP IP: ");
     Serial.println(WiFi.softAPIP());
+
+#ifdef LCD_DONGLE
+    lcdShowInfo(AP_TITLE, WiFi.softAPIP().toString(), AP_SSID, AP_PASSWORD);
+#endif
 
     Serial.printf(
         "SSID: %s\n",
