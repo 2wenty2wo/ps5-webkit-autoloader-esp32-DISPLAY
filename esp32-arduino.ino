@@ -31,6 +31,26 @@ static void lcdInit()
 {
     pinMode(LCD_BL, OUTPUT);
     digitalWrite(LCD_BL, LOW);
+#ifdef LCD_TEST
+    // Diagnostic: cycle init modes, show color bars + label. Note which letter looks right.
+    for (int m = 0; m < 3; m++)
+    {
+        lcd.initR(m == 1 ? INITR_MINI160x80_PLUGIN : INITR_MINI160x80);
+        lcd.invertDisplay(m == 2);
+        lcd.setRotation(1);
+        lcd.fillScreen(ST77XX_BLACK);
+        lcd.fillRect(0, 0, 40, 40, ST77XX_RED);
+        lcd.fillRect(40, 0, 40, 40, ST77XX_GREEN);
+        lcd.fillRect(80, 0, 40, 40, ST77XX_BLUE);
+        lcd.fillRect(120, 0, 40, 40, ST77XX_WHITE);
+        lcd.drawRect(0, 0, 160, 80, ST77XX_YELLOW);
+        lcd.setTextColor(ST77XX_WHITE);
+        lcd.setTextSize(4);
+        lcd.setCursor(60, 46);
+        lcd.print(m == 0 ? "A" : m == 1 ? "B" : "C");
+        delay(3000);
+    }
+#endif
     lcd.initR(LCD_INIT_VARIANT);
     lcd.setRotation(1);   // 160x80 landscape
     lcd.fillScreen(ST77XX_BLACK);

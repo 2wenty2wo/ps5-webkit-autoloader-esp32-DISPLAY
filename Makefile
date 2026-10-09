@@ -65,6 +65,9 @@ USB_DEBUG_FLAG := -DUSB_DEBUG=$(USB_DEBUG)
 LCD ?= 0
 ifeq ($(LCD),1)
 LCD_FLAG := -DLCD_DONGLE
+ifeq ($(LCD_TEST),1)
+LCD_FLAG += -DLCD_TEST
+endif
 endif
 ifeq ($(USB_DEBUG),1)
 S2_TLS_DEBUG_LINK := --build-property "compiler.c.elf.extra_flags=-Wl,--wrap=esp_tls_server_session_create"
