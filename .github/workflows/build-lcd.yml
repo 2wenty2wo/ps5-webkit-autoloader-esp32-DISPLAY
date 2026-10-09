@@ -3,9 +3,12 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ["v*"]
 jobs:
   build:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,7 +26,18 @@ jobs:
           fi
       - name: Build
         run: make s3-lcd
+      - name: Rename output
+        run: |
+          mkdir -p dist
+          tag="${GITHUB_REF_NAME}"
+          [ "${GITHUB_REF_TYPE}" = "tag" ] || tag="dev-${GITHUB_SHA::7}"
+          cp build/lcd/s3/esp32-arduino.s3.merged.bin "dist/esp32-arduino.s3.merged-lcd-${tag}.bin"
       - uses: actions/upload-artifact@v4
         with:
           name: s3-lcd-firmware
-          path: build/lcd/s3/esp32-arduino.s3.merged.bin
+          path: dist/*.bin
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.bin
