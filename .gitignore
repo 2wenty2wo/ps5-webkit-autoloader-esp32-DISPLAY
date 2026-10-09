@@ -12,3 +12,5 @@ __pycache__/
 /autoloader-*
 /*.mini/
 /henloader/
+!/autoloader/**/*.bin
+!/autoloader/**/*.elf
