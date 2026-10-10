@@ -10,6 +10,100 @@
 #include "esp_idf_version.h"
 #include "server_certs.h"
 
+#ifdef LCD_DONGLE
+// Pocket-Dongle-S3 0.96" ST7735 80x160 LCD (software SPI).
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+
+// Pocket-Dongle-S3 (AliExpress) pins. Backlight is always on (no control pin).
+#define LCD_MOSI 11
+#define LCD_SCLK 10
+#define LCD_CS   12
+#define LCD_DC   13
+#define LCD_RST  14
+#ifndef LCD_INIT_VARIANT
+#define LCD_INIT_VARIANT INITR_MINI160x80_PLUGIN   // fallback: INITR_MINI160x80
+#endif
+
+#ifndef LCD_X_OFF
+#define LCD_X_OFF 1    // horizontal origin offset (landscape)
+#endif
+#ifndef LCD_Y_OFF
+#define LCD_Y_OFF 26   // vertical origin offset (landscape)
+#endif
+
+class LcdPanel : public Adafruit_ST7735
+{
+public:
+    using Adafruit_ST7735::Adafruit_ST7735;
+    void setOrigin(int16_t x, int16_t y) { _xstart = x; _ystart = y; }
+    // Black out the whole controller RAM (132x162) so no stale pixels show.
+    void clearRam()
+    {
+        static const int16_t o[4][2] = {{0, 0}, {2, 0}, {0, 52}, {2, 52}};
+        for (int i = 0; i < 4; i++)
+        {
+            setOrigin(o[i][0], o[i][1]);
+            fillScreen(ST77XX_BLACK);
+        }
+    }
+};
+
+static LcdPanel lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
+
+static void lcdInit()
+{
+    lcd.initR(LCD_INIT_VARIANT);
+    lcd.setRotation(1);   // 160x80 landscape
+#ifdef LCD_TEST
+    // Offset scan: find the label whose white border is complete on all 4 edges
+    // with no junk rows/columns. Report that X/Y pair.
+    for (int x = 0; x <= 4; x++)
+    {
+        for (int y = 24; y <= 29; y++)
+        {
+            lcd.clearRam();
+            lcd.setOrigin(x, y);
+            lcd.drawRect(0, 0, 160, 80, ST77XX_WHITE);
+            lcd.setTextColor(ST77XX_YELLOW);
+            lcd.setTextSize(2);
+            lcd.setCursor(20, 32);
+            lcd.printf("X%d Y%d", x, y);
+            delay(1200);
+        }
+    }
+#endif
+    lcd.clearRam();
+    lcd.setOrigin(LCD_X_OFF, LCD_Y_OFF);
+    lcd.fillScreen(ST77XX_BLACK);
+    lcd.setTextWrap(false);
+    lcd.setTextSize(1);
+}
+
+static void lcdLine(int16_t y, const char *label, const String &value)
+{
+    lcd.setTextColor(ST77XX_CYAN);
+    lcd.setCursor(2, y);
+    lcd.print(label);
+    lcd.setTextColor(ST77XX_WHITE);
+    lcd.print(value);
+}
+
+static void lcdShowInfo(const char *title, const String &ip,
+                        const char *ssid, const char *pass)
+{
+    lcd.fillScreen(ST77XX_BLACK);
+    lcd.fillRect(0, 0, 160, 14, ST77XX_BLUE);
+    lcd.setTextColor(ST77XX_WHITE);
+    int16_t x = (160 - (int16_t)strlen(title) * 6) / 2;
+    lcd.setCursor(x < 0 ? 0 : x, 3);
+    lcd.print(title);
+    lcdLine(22, "IP:   ", ip);
+    lcdLine(40, "WiFi: ", String(ssid));
+    lcdLine(58, "Pass: ", String(pass));
+}
+#endif
+
 #ifndef USB_DEBUG
 #define USB_DEBUG 0
 #endif
@@ -138,7 +232,8 @@ extern "C" int __wrap_esp_tls_server_session_create(esp_tls_cfg_server_t *cfg,
 
 httpd_handle_t httpsServer = NULL;
 
-static const char *AP_SSID = "ESP32_PORTAL";
+static const char *AP_TITLE = "PS5 Master Key";
+static const char *AP_SSID = AP_TITLE;
 static const char *AP_PASSWORD = "12345678";
 static const char *PORTAL_REDIRECT_URL = "http://192.168.4.1/";
 
@@ -938,6 +1033,10 @@ void setup()
 
     Serial.begin(115200);
 
+#ifdef LCD_DONGLE
+    lcdInit();
+#endif
+
     delay(1000);
 #if USB_DEBUG
     esp_log_set_vprintf(tlsDebugVprintf);
@@ -1003,6 +1102,10 @@ void setup()
 
     Serial.print("AP IP: ");
     Serial.println(WiFi.softAPIP());
+
+#ifdef LCD_DONGLE
+    lcdShowInfo(AP_TITLE, WiFi.softAPIP().toString(), AP_SSID, AP_PASSWORD);
+#endif
 
     Serial.printf(
         "SSID: %s\n",
