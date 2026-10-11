@@ -2,11 +2,10 @@
 
 A compact HTTP/HTTPS host for the PS5 WebKit Autoloader, packaged as 4 MB flash images for ESP32-PICO, ESP32-S2, ESP32-S3 and ESP32-C3 boards. All targets use LittleFS and do not require PSRAM.
 
-The web content in `autoloader/` is based on a modified version of the [`ps5-webkit-autoloader`](https://github.com/itsPLK/ps5-webkit-autoloader) frontend. Its bundled [`slopkit`](https://github.com/itsPLK/slopkit), [`umtx2`](https://github.com/idlesauce/umtx2) and [`ps5-unified-autoloader`](https://github.com/owendswang/ps5-unified-autoloader/tree/feat/install-webkit-shortcut) components also contain project-specific modifications and therefore do not exactly match upstream.
+The web content in `autoloader/` is based on a modified version of the [`ps5-webkit-autoloader`](https://github.com/itsPLK/ps5-webkit-autoloader) frontend. Its bundled [`slopkit`](https://github.com/itsPLK/slopkit), [`ps5-unified-autoloader`](https://github.com/owendswang/ps5-unified-autoloader/tree/feat/install-webkit-shortcut) components also contain project-specific modifications and therefore do not exactly match upstream.
 
 ## Firmware Version Supports
 
-- ~~umtx2        1.00 -  5.50~~ NOT SUPPORTED (`System out of memory` Error)
 - poops        7.00 - 12.00
 - relapse        7.00 - 13.60   (except 9.05 and 11.40)
 
@@ -22,7 +21,7 @@ You could choose to use poops or relapse if your FW supports both methods while 
 
 After a successful installation, the web content is cached on the PS5. On subsequent boots, launch **WebKit Autoloader** directly from the Media section.
 
-A network connection is still **REQUIRED** to complete the exploit process, as the exploit method relies on the PS5 having an active network interface and IP address. Internet access itself is not required.
+A network connection is still **REQUIRED** to complete the `Relapse` exploit process, as the exploit method relies on the PS5 having an active network interface and IP address. Internet access itself is not required. `Poops` method doesn't need that.
 
 If an attempt fails, follow the on-screen instruction to reboot and try again. If the console freezes, crashes, or powers off, turn it back on and retry. Use this project at your own risk.
 
@@ -63,24 +62,6 @@ The build copies `autoloader/` to a temporary `data/` directory, compresses the 
 
 Use `make pico`, `make s2`, `make s3`, `make c3`~~, `make 8266`~~, or `make clean` to build an individual target or clean generated files. ~~The ESP-12F target uses the Generic ESP8266 4 MB / 3 MB LittleFS layout and produces `build/8266/esp8266-arduino.esp12f.merged.bin`.~~
 
-## Extract embedded autoloader binaries
-
-After adapting upstream HTML for the ESP32 split caches, run:
-
-```sh
-python3 externalize_autoloader.py
-```
-
-The script detects the version under `autoloader/app/`, extracts the shared
-`shared/elfldr-ps5.elf`, `shared/kexp-ps5.bin`, and `payloads/autoloader.elf`,
-switches both pages to ordinary same-origin fetches, and adds the resources to
-both manifests before `__complete__`. It verifies sizes, SHA-256 hashes, and
-agreement between the pages before writing. Repeated runs verify the files
-without changing them. An alternative web directory can be passed as an argument.
-
-Original files are backed up outside the web directory, under
-`autoloader-externalize-backup/<version>/`, so backups are not included in LittleFS.
-
 ## Manifest updates
 
 ESP32 serves `.appcache`, `.manifest`, and `.cache` files over HTTP and HTTPS
@@ -88,18 +69,12 @@ with a random 16-digit hexadecimal `# VERSION` comment generated once per boot
 and HTTP no-cache headers. Resource lists are preserved; the generated version
 is not written to flash. Manifests remain uncompressed in LittleFS.
 
-Rebuild and flash the merged image so both firmware and LittleFS are updated.
-The version stays the same across HTTP and HTTPS requests until ESP32 restarts,
-so a browser's final manifest consistency check receives identical content.
-After a restart, the new version triggers an update on the next online cache
-check. Repeated visits during the same boot do not force another update;
-offline visits keep the existing cache.
-
 ## Credits
 
 - [itsPLK/ps5-webkit-autoloader](https://github.com/itsPLK/ps5-webkit-autoloader)
 - [itsPLK/ps5-unified-autoloader](https://github.com/itsPLK/ps5-unified-autoloader)
 - [jordyidk/slopkit](https://github.com/jordyidk/slopkit)
+- [ntfargo/Relapse-Exploit](https://github.com/ntfargo/Relapse-Exploit)
 
 Credit also belongs to all projects, researchers, and developers referenced by these upstream projects.
 
