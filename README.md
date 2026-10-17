@@ -1,3 +1,16 @@
+# ESP32 PS5 WebKit Autoloader – Display Edition
+
+Fork of [owendswang/ps5-webkit-autoloader-esp32](https://github.com/owendswang/ps5-webkit-autoloader-esp32),
+which is itself based on [itsPLK/ps5-webkit-autoloader](https://github.com/itsPLK/ps5-webkit-autoloader).
+
+## Changes in this fork
+- Added display support: <describe>
+- <other changes>
+
+Everything else is unchanged from the original. See Credits and License below.
+
+-----------------------------------------------------------------------------------------------------------
+
 # ESP32 PS5 WebKit Autoloader
 
 A compact HTTP/HTTPS host for the PS5 WebKit Autoloader, packaged as 4 MB flash images for ESP32-PICO, ESP32-S2, ESP32-S3 and ESP32-C3 boards. All targets use LittleFS and do not require PSRAM.
