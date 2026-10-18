@@ -25,6 +25,10 @@
 #define LCD_INIT_VARIANT INITR_MINI160x80_PLUGIN   // fallback: INITR_MINI160x80
 #endif
 
+#ifndef APP_VERSION
+#define APP_VERSION "0.6.1"
+#endif
+
 #ifndef LCD_X_OFF
 #define LCD_X_OFF 1    // horizontal origin offset (landscape)
 #endif
@@ -89,8 +93,8 @@ static void lcdLine(int16_t y, const char *label, const String &value)
     lcd.print(value);
 }
 
-static void lcdShowInfo(const char *title, const String &ip,
-                        const char *ssid, const char *pass)
+static void lcdDrawStatic(const char *title, const String &ip,
+                          const char *ssid, const char *pass)
 {
     lcd.fillScreen(ST77XX_BLACK);
     lcd.fillRect(0, 0, 160, 14, ST77XX_BLUE);
@@ -101,6 +105,28 @@ static void lcdShowInfo(const char *title, const String &ip,
     lcdLine(22, "IP:   ", ip);
     lcdLine(40, "WiFi: ", String(ssid));
     lcdLine(58, "Pass: ", String(pass));
+}
+
+// Bottom-right corner, overwritten in place; doesn't touch the lines above.
+static void lcdDrawFooter(uint8_t clients)
+{
+    lcd.fillRect(0, 70, 160, 10, ST77XX_BLACK);
+    lcd.setTextColor(ST77XX_GREEN);
+    lcd.setCursor(2, 71);
+    lcd.print("v");
+    lcd.print(APP_VERSION);
+    char buf[16];
+    snprintf(buf, sizeof(buf), "Clients: %u", clients);
+    int16_t x = 160 - (int16_t)strlen(buf) * 6 - 2;
+    lcd.setCursor(x < 0 ? 0 : x, 71);
+    lcd.print(buf);
+}
+
+static void lcdShowInfo(const char *title, const String &ip,
+                        const char *ssid, const char *pass)
+{
+    lcdDrawStatic(title, ip, ssid, pass);
+    lcdDrawFooter(WiFi.softAPgetStationNum());
 }
 #endif
 
@@ -1153,12 +1179,30 @@ void setup()
     Serial.println("READY");
 }
 
+#ifdef LCD_DONGLE
+static uint32_t lcdNextRefresh = 0;
+static uint8_t lcdLastClients = 255;   // force first refresh
+#endif
+
 void loop()
 {
     dnsServer.processNextRequest();
     webServer.handleClient();
 #ifdef LED_PIN
     ledUpdate();
+#endif
+
+#ifdef LCD_DONGLE
+    if ((int32_t)(millis() - lcdNextRefresh) >= 0)
+    {
+        uint8_t clients = WiFi.softAPgetStationNum();
+        if (clients != lcdLastClients)
+        {
+            lcdDrawFooter(clients);
+            lcdLastClients = clients;
+        }
+        lcdNextRefresh = millis() + 1000;   // poll once a second
+    }
 #endif
 
     delay(2);
