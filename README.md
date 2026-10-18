@@ -5,6 +5,7 @@ which is itself based on [itsPLK/ps5-webkit-autoloader](https://github.com/itsPL
 
 ## Changes in this fork
 - Added display support: <describe>
+- Wifi Hotspot, Ip address, Password, firmware version & Clients connected.
 - <other changes>
 
 Everything else is unchanged from the original. See Credits and License below.
