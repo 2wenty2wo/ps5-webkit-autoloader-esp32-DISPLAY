@@ -26,7 +26,7 @@ The web content in `autoloader/` is based on a modified version of the [`ps5-web
 
 You could choose to use poops or relapse if your FW supports both methods while caching. It would use Poops by default if you don't choose.
 
-## Usage
+## Flashing your ESP32 S3 Dongle
 
 1. HOLD the Reset button, plug the dongle to pc, wait for 1 second then release button. If PC says USB not recognised, then button was not pressed.
 2. Open https://adafruit.github.io/Adafruit_WebSerial_ESPTool/
