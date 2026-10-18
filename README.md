@@ -6,7 +6,7 @@ which is itself based on [itsPLK/ps5-webkit-autoloader](https://github.com/itsPL
 ## Changes in this fork
 - Added display support: <describe>
 - Wifi Hotspot, Ip address, Password, firmware version & Clients connected.
-- <other changes>
+- Added flashing isntructions and wifi name change in the readme.
 
 Everything else is unchanged from the original. See Credits and License below.
 
@@ -28,8 +28,22 @@ You could choose to use poops or relapse if your FW supports both methods while 
 
 ## Usage
 
+1. HOLD the Reset button, plug the dongle to pc, wait for 1 second then release button. If PC says USB not recognised, then button was not pressed.
+2. Open https://adafruit.github.io/Adafruit_WebSerial_ESPTool/
+3. Go to top right corner of the site and Set to 115200 baud and Click Connect button
+4. Select the Port that came up when you did step 1. (Port usaully has label SUB "JTAG/Serial Debug..."
+5. Click ERASE button, confirm it will erase everything and wait for it to finish (about 3-5 seconds)
+6. Click the top most 'choose a file' button and select the .bin file from the release page of this repo
+7. Click Program button and wait for flashing to finish. Around 40-60 seconds.
+8. Remove the dongle from the usb port to completely power off
+9. Test the Dongle by plugging it back in to any dumb or pc usb port. Ignore the USB not recognised since we are not putting it in flash mode again.
+10. Look for the WIfi Hotspot `PS5 MASTER KEY` and check the display if information is being shown.
+11. If all goes well proceed to Usage section.
+
+## Usage
+
 1. Plug the ESP32 into the PS5 and turn on the console.
-2. Connect the PS5 to the `ESP32_PORTAL` Wi-Fi network using the password `12345678`.
+2. Connect the PS5 to the `PS5 MASTER KEY` Wi-Fi network using the password `12345678`.
 3. Open **Settings → Guide & Tips ... → Guide & Tips → User's Guide**.
 4. Wait for the installation and caching process to finish. Do not disconnect the ESP32 while it is still running.
 5. On success, Payload Manager opens automatically and a **WebKit Autoloader** shortcut appears in the **Media** section of the home screen.
