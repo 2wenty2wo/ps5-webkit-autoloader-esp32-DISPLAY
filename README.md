@@ -33,7 +33,7 @@ You could choose to use poops or relapse if your FW supports both methods while 
 3. Go to top right corner of the site and Set to 115200 baud and Click Connect button
 4. Select the Port that came up when you did step 1. (Port usaully has label SUB "JTAG/Serial Debug..."
 5. Click ERASE button, confirm it will erase everything and wait for it to finish (about 3-5 seconds)
-6. Click the top most 'choose a file' button and select the .bin file from the release page of this repo
+6. Click the top most 'choose a file' button and select the .bin file from the releases page of this repo. https://github.com/poorDevMan/ps5-webkit-autoloader-esp32-DISPLAY/releases
 7. Click Program button and wait for flashing to finish. Around 40-60 seconds.
 8. Remove the dongle from the usb port to completely power off
 9. Test the Dongle by plugging it back in to any dumb or pc usb port. Ignore the USB not recognised since we are not putting it in flash mode again.
