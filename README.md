@@ -7,7 +7,7 @@ which is itself based on [itsPLK/ps5-webkit-autoloader](https://github.com/itsPL
 - Added display support: <describe>
 - Wifi Hotspot, Ip address, Password, firmware version & Clients connected.
 - Added flashing isntructions and wifi name change in the readme.
-- Link to the ESP32 S3 dongle used: I just found this on AliExpress: 
+- Link to the ESP32 S3 dongle used:
 ESP32-S3 Pocket-Dongle-S3 N16R8 Development Board with 0.96-Inch LCD Display Screen
 https://a.aliexpress.com/_mNePDHN
 Or you can find a similar one from a different store.
