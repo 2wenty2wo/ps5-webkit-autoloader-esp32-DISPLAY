@@ -1,8 +1,8 @@
 # ESP32 PS5 WebKit Autoloader – Display Edition
 
-##SIMULATED:
+## SIMULATED:
 <img width="1920" height="960" alt="Simulated" src="https://github.com/user-attachments/assets/d3c520d3-3c85-4c83-a5f0-78331f3b972d" />
-##ACTUAL:
+## ACTUAL:
 <img width="1766" height="1324" alt="RealWorld" src="https://github.com/user-attachments/assets/b43dbfff-a8b0-4cd4-b5a6-93da6ba279db" />
 
 Fork of [owendswang/ps5-webkit-autoloader-esp32](https://github.com/owendswang/ps5-webkit-autoloader-esp32),
